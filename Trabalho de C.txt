@@ -1,0 +1,461 @@
+TRABALHO AV2
+
+Samuel Mesquita de Aquino - 202208614736
+Davi de Oliveira Costa Ghiggino - 202211227039
+Edson Giannini Ferreira - 202208614752
+
+1)
+#include <stdio.h>
+#include <stdlib.h>
+
+typedef struct Produto {
+    int codigo;
+    float preco;
+    int quant_estoque;
+    struct Produto* proximo;
+} Produto;
+
+void inserir(Produto** inicio, int codigo, float preco, int quant_estoque) {
+    Produto* novo = (Produto*)malloc(sizeof(Produto));
+    novo->codigo = codigo;
+    novo->preco = preco;
+    novo->quant_estoque = quant_estoque;
+    novo->proximo = *inicio;
+    *inicio = novo;
+}
+
+int main() {
+    Produto* inicio = NULL;
+    int codigo;
+    float preco;
+    int quant_estoque;
+    float desconto;
+
+    for (int i = 0; i < 5; i++) {
+        printf("Informe o código do produto %d: ", i + 1);
+        scanf("%d", &codigo);
+        printf("Informe o preço do produto %d: ", i + 1);
+        scanf("%f", &preco);
+        printf("Informe a quantidade em estoque do produto %d: ", i + 1);
+        scanf("%d", &quant_estoque);
+        inserir(&inicio, codigo, preco, quant_estoque);
+    }
+
+    printf("\nInforme o valor do desconto (em porcentagem): ");
+    scanf("%f", &desconto);
+
+    Produto* atual = inicio;
+    while (atual != NULL) {
+        atual->preco -= (desconto / 100) * atual->preco;
+        atual = atual->proximo;
+    }
+
+    printf("\nLista de produtos (com desconto aplicado):\n");
+    atual = inicio;
+    while (atual != NULL) {
+        printf("Produto:\n");
+        printf("Código: %d\n", atual->codigo);
+        printf("Preço: %.2f\n", atual->preco);
+        printf("Quantidade em estoque: %d\n\n", atual->quant_estoque);
+        atual = atual->proximo;
+    }
+
+    int quantidadeEstoqueMaior500 = 0;
+    atual = inicio;
+    while (atual != NULL) {
+        if (atual->quant_estoque > 500) {
+            quantidadeEstoqueMaior500++;
+        }
+        atual = atual->proximo;
+    }
+
+    printf("Quantidade de produtos com estoque maior que 500: %d\n", quantidadeEstoqueMaior500);
+
+    atual = inicio;
+    while (atual != NULL) {
+        Produto* temp = atual;
+        atual = atual->proximo;
+        free(temp);
+    }
+
+    return 0;
+}
+
+2)
+#include <stdio.h>
+#include <stdlib.h>
+#include <string.h>
+
+typedef struct Funcionario {
+    char nome[100];
+    float salario;
+    struct Funcionario* proximo;
+} Funcionario;
+
+void inserirOrdenado(Funcionario** inicio, char nome[], float salario) {
+    Funcionario* novo = (Funcionario*)malloc(sizeof(Funcionario));
+    strcpy(novo->nome, nome);
+    novo->salario = salario;
+    novo->proximo = NULL;
+
+    if (*inicio == NULL || salario >= (*inicio)->salario) {
+        novo->proximo = *inicio;
+        *inicio = novo;
+    } else {
+        Funcionario* atual = *inicio;
+        while (atual->proximo != NULL && atual->proximo->salario > salario) {
+            atual = atual->proximo;
+        }
+        novo->proximo = atual->proximo;
+        atual->proximo = novo;
+    }
+}
+
+int main() {
+    Funcionario* inicio = NULL;
+    char nome[100];
+    float salario;
+    int quant_funcionarios = 2;
+    
+    for (int i = 0; i < quant_funcionarios; i++) {
+        printf("Informe o nome do funcionário %d: ", i + 1);
+        scanf("%s", nome);
+        printf("Informe o salário do funcionário %d: ", i + 1);
+        scanf("%f", &salario);
+        inserirOrdenado(&inicio, nome, salario);
+    }
+
+    printf("\nLista de funcionários:\n");
+    Funcionario* atual = inicio;
+    while (atual != NULL) {
+        printf("Funcionário:\n");
+        printf("Nome: %s\n", atual->nome);
+        printf("Salário: %.2f\n\n", atual->salario);
+        atual = atual->proximo;
+    }
+
+    atual = inicio;
+    char nomeMaiorSalario[100];
+    float maiorSalario = 0.0;
+    while (atual != NULL) {
+        if (atual->salario > maiorSalario) {
+            maiorSalario = atual->salario;
+            strcpy(nomeMaiorSalario, atual->nome);
+        }
+        atual = atual->proximo;
+    }
+
+    printf("Funcionário com o maior salário: %s\n", nomeMaiorSalario);
+
+    atual = inicio;
+    float somaSalarios = 0.0;
+    while (atual != NULL) {
+        somaSalarios += atual->salario;
+        atual = atual->proximo;
+    }
+
+    float mediaSalarios = somaSalarios / quant_funcionarios;
+    printf("Média de salários dos funcionários: %.2f\n", mediaSalarios);
+
+    float salarioComparacao;
+    printf("\nInforme um valor de salário para comparação: ");
+    scanf("%f", &salarioComparacao);
+
+    printf("\nFuncionários com salário maior que %.2f:\n", salarioComparacao);
+    atual = inicio;
+    int encontrados = 0;
+    while (atual != NULL) {
+        if (atual->salario > salarioComparacao) {
+            printf("%s\n", atual->nome);
+            encontrados = 1;
+        }
+        atual = atual->proximo;
+    }
+
+    if (!encontrados) {
+        printf("Nenhum funcionário com salário maior que %.2f encontrado.\n", salarioComparacao);
+    }
+
+    atual = inicio;
+    while (atual != NULL) {
+        Funcionario* temp = atual;
+        atual = atual->proximo;
+        free(temp);
+    }
+
+    return 0;
+}
+
+3)
+#include <stdio.h>
+#include <stdlib.h>
+#include <string.h>
+
+typedef struct Aluno {
+    char nome[100];
+    float notaFinal;
+    struct Aluno* proximo;
+    struct Aluno* anterior;
+} Aluno;
+
+void inserirAluno(Aluno** inicio, char nome[], float notaFinal) {
+    Aluno* novo = (Aluno*)malloc(sizeof(Aluno));
+    strcpy(novo->nome, nome);
+    novo->notaFinal = notaFinal;
+    novo->proximo = NULL;
+    novo->anterior = NULL;
+
+    if (*inicio == NULL) {
+        *inicio = novo;
+    } else {
+        Aluno* atual = *inicio;
+        while (atual->proximo != NULL) {
+            atual = atual->proximo;
+        }
+        atual->proximo = novo;
+        novo->anterior = atual;
+    }
+}
+
+void exibirAlunosAprovados(Aluno* inicio, float notaMinima) {
+    printf("\nAlunos com nota final igual ou maior que %.2f:\n", notaMinima);
+    int encontrados = 0;
+    Aluno* atual = inicio;
+    while (atual != NULL) {
+        if (atual->notaFinal >= notaMinima) {
+            printf("Nome: %s\n", atual->nome);
+            printf("Nota Final: %.2f\n\n", atual->notaFinal);
+            encontrados = 1;
+        }
+        atual = atual->proximo;
+    }
+
+    if (!encontrados) {
+        printf("Nenhum aluno com nota final igual ou maior que %.2f encontrado.\n", notaMinima);
+    }
+}
+
+int main() {
+    Aluno* inicio = NULL;
+    char nome[100];
+    float notaFinal;
+    int quant_alunos = 5;
+
+    for (int i = 0; i < quant_alunos; i++) {
+        printf("Informe o nome do aluno %d: ", i + 1);
+        scanf("%s", nome);
+        printf("Informe a nota final do aluno %d: ", i + 1);
+        scanf("%f", &notaFinal);
+        inserirAluno(&inicio, nome, notaFinal);
+    }
+
+    float notaMinima;
+    printf("\nInforme a nota mínima para aprovação: ");
+    scanf("%f", &notaMinima);
+
+    exibirAlunosAprovados(inicio, notaMinima);
+
+    Aluno* atual = inicio;
+    while (atual != NULL) {
+        Aluno* temp = atual;
+        atual = atual->proximo;
+        free(temp);
+    }
+
+    return 0;
+}
+
+4)
+#include <stdio.h>
+#include <stdlib.h>
+#include <string.h>
+#include <ctype.h>
+
+typedef struct Funcionario {
+    char nome[100];
+    float salario;
+    float imposto;
+    struct Funcionario* proximo;
+    struct Funcionario* anterior;
+} Funcionario;
+
+void inserirOrdenado(Funcionario** inicio, char nome[], float salario) {
+    Funcionario* novo = (Funcionario*)malloc(sizeof(Funcionario));
+    strcpy(novo->nome, nome);
+    novo->salario = salario;
+    novo->imposto = 0.0;
+    novo->proximo = NULL;
+    novo->anterior = NULL;
+
+    if (*inicio == NULL || salario < (*inicio)->salario) {
+        novo->proximo = *inicio;
+        if (*inicio != NULL) {
+            (*inicio)->anterior = novo;
+        }
+        *inicio = novo;
+    } else {
+        Funcionario* atual = *inicio;
+        while (atual->proximo != NULL && salario >= atual->proximo->salario) {
+            atual = atual->proximo;
+        }
+        novo->proximo = atual->proximo;
+        novo->anterior = atual;
+        if (atual->proximo != NULL) {
+            atual->proximo->anterior = novo;
+        }
+        atual->proximo = novo;
+    }
+}
+void calcularImposto(Funcionario* inicio) {
+    Funcionario* atual = inicio;
+    while (atual != NULL) {
+        if (atual->salario <= 1300.00) {
+            atual->imposto = 0.0;
+        } else if (atual->salario <= 2500.00) {
+            atual->imposto = atual->salario * 0.1;
+        } else {
+            atual->imposto = atual->salario * 0.2;
+        }
+        atual = atual->proximo;
+    }
+}
+void exibirFuncionarios(Funcionario* inicio) {
+    printf("\nLista de funcionários:\n");
+    Funcionario* atual = inicio;
+    while (atual != NULL) {
+        printf("Funcionário:\n");
+        printf("Nome: %s\n", atual->nome);
+        printf("Salário: %.2f\n", atual->salario);
+        printf("Imposto: %.2f\n", atual->imposto);
+        printf("Salário líquido: %.2f\n\n", atual->salario - atual->imposto);
+        atual = atual->proximo;
+    }
+}
+void filtrarFuncionarios(Funcionario* inicio, char caractere) {
+    int encontrado = 0;
+    printf("\nFuncionários com nome iniciado por '%c':\n", caractere);
+    Funcionario* atual = inicio;
+    while (atual != NULL) {
+        if (tolower(atual->nome[0]) == tolower(caractere)) {
+            printf("Nome: %s\n", atual->nome);
+            printf("Salário: %.2f\n\n", atual->salario);
+            encontrado = 1;
+        }
+        atual = atual->proximo;
+    }
+    if (!encontrado) {
+        printf("Nenhum funcionário encontrado com nome iniciado por '%c'.\n", caractere);
+    }
+}
+void inserirOrdenadoCrescente(Funcionario** inicioCrescente, char nome[], float salario) {
+    Funcionario* novo = (Funcionario*)malloc(sizeof(Funcionario));
+    strcpy(novo->nome, nome);
+    novo->salario = salario;
+    novo->imposto = 0.0;
+    novo->proximo = NULL;
+    novo->anterior = NULL;
+
+    if (*inicioCrescente == NULL || salario < (*inicioCrescente)->salario) {
+        novo->proximo = *inicioCrescente;
+        if (*inicioCrescente != NULL) {
+            (*inicioCrescente)->anterior = novo;
+        }
+        *inicioCrescente = novo;
+    } else {
+        Funcionario* atual = *inicioCrescente;
+        while (atual->proximo != NULL && salario >= atual->proximo->salario) {
+            atual = atual->proximo;
+        }
+        novo->proximo = atual->proximo;
+        novo->anterior = atual;
+        if (atual->proximo != NULL) {
+            atual->proximo->anterior = novo;
+        }
+        atual->proximo = novo;
+    }
+}
+void inserirOrdenadoDecrescente(Funcionario** inicioDecrescente, char nome[], float salario) {
+    Funcionario* novo = (Funcionario*)malloc(sizeof(Funcionario));
+    strcpy(novo->nome, nome);
+    novo->salario = salario;
+    novo->imposto = 0.0;
+    novo->proximo = NULL;
+    novo->anterior = NULL;
+
+    if (*inicioDecrescente == NULL || salario > (*inicioDecrescente)->salario) {
+        novo->proximo = *inicioDecrescente;
+        if (*inicioDecrescente != NULL) {
+            (*inicioDecrescente)->anterior = novo;
+        }
+        *inicioDecrescente = novo;
+    } else {
+        Funcionario* atual = *inicioDecrescente;
+        while (atual->proximo != NULL && salario <= atual->proximo->salario) {
+            atual = atual->proximo;
+        }
+        novo->proximo = atual->proximo;
+        novo->anterior = atual;
+        if (atual->proximo != NULL) {
+            atual->proximo->anterior = novo;
+        }
+        atual->proximo = novo;
+    }
+}
+
+
+int main() {
+    Funcionario* inicio = NULL;
+    Funcionario* inicioCrescente = NULL;
+    Funcionario* inicioDecrescente = NULL;
+    char nome[100];
+    float salario;
+    int quant_funcionarios = 2;
+    char caractere;
+
+    for (int i = 0; i < quant_funcionarios; i++) {
+        printf("Informe o nome do funcionário %d: ", i + 1);
+        scanf("%s", nome);
+        printf("Informe o salário do funcionário %d: ", i + 1);
+        scanf("%f", &salario);
+        inserirOrdenado(&inicio, nome, salario);
+        inserirOrdenadoCrescente(&inicioCrescente, nome, salario);
+        inserirOrdenadoDecrescente(&inicioDecrescente, nome, salario);
+    }
+
+    calcularImposto(inicio);
+
+    exibirFuncionarios(inicio);
+
+    printf("Informe um caractere para filtrar os funcionários: ");
+    scanf(" %c", &caractere);
+    filtrarFuncionarios(inicio, caractere);
+
+    printf("\nLista de funcionários (ordenada de forma crescente pelo salário):\n");
+    exibirFuncionarios(inicioCrescente);
+
+    printf("\nLista de funcionários (ordenada de forma decrescente pelo salário):\n");
+    exibirFuncionarios(inicioDecrescente);
+
+    Funcionario* atual = inicio;
+    while (atual != NULL) {
+        Funcionario* proximo = atual->proximo;
+        free(atual);
+        atual = proximo;
+    }
+
+    atual = inicioCrescente;
+    while (atual != NULL) {
+        Funcionario* proximo = atual->proximo;
+        free(atual);
+        atual = proximo;
+    }
+
+    atual = inicioDecrescente;
+    while (atual != NULL) {
+        Funcionario* proximo = atual->proximo;
+        free(atual);
+        atual = proximo;
+    }
+
+    return 0;
+}
